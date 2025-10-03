@@ -253,6 +253,8 @@ public class Main {
             // After the file ends, process any token that was being built
             if (currentState.isAccepting() && !currentLexeme.isEmpty()) {
                 processToken(currentState, currentLexeme.toString());
+            } else if (!currentLexeme.isEmpty()) { // for edge case where lexeme string ends in an incomplete token
+                System.err.println("Error: Unfinished token '" + currentLexeme + "'"); 
             }
 
             System.out.println("------------------------------------");
