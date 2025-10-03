@@ -1,3 +1,9 @@
+/*
+ * CS 410 - Phase 1 Scanner
+ * Authors: Seth McBee and Christian Williams
+ * Reviewer: Jacob Kosinski
+ */
+
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PushbackReader;
@@ -71,6 +77,7 @@ enum InputAlphabet {
 public class Main {
     // State transition table in the form of a 2D array
     static State[][] transitions = new State[State.values().length][InputAlphabet.values().length];
+    // Map for mapping our keywords (if, while, for, elif, else)
     static Map<String, String> keywords = new HashMap<>();
 
     /**
