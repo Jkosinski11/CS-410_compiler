@@ -10,9 +10,9 @@ import java.util.Map;
  */
 enum State {
     START(null), // q0, the initial state
-    IN_IDENTIFIER("IDENTIFIER"), // Reading a variable name
-    IN_INTEGER("INTEGER_LITERAL"), // Reading an integer
-    SAW_POINT(null), // Saw a '.', could be a float
+    IN_IDENTIFIER("IDENTIFIER"), // Variable name token
+    IN_INTEGER("INTEGER_LITERAL"), // Integer token
+    SAW_POINT(null), // Saw a '.', will treat it as part of a float if it is followed by numbers. Otherwise considered incomplete
     IN_FLOAT("FLOAT_LITERAL"), // Reading the decimal part of a float
     SAW_LESS("<"), // Saw '<', could be '<='
     SAW_GREATER(">"), // Saw '>', could be '>='
@@ -28,7 +28,7 @@ enum State {
     DIV("/"),
     LEFT_PAREN("("),
     RIGHT_PAREN(")"),
-    COLON(":"), // Added for language syntax (e.g., if condition:)
+    COLON(":"), 
     ERROR(null); // Represents an invalid transition
 
     public final String token;
@@ -44,8 +44,8 @@ enum State {
 }
 
 /**
- * The InputAlphabet enum categorizes every possible input character.
- * This simplifies the transition table by grouping similar characters.
+ * The InputAlphabet enumeration categorizes every possible input character into groups which
+ * simplifies the transition table
  */
 enum InputAlphabet {
     LETTER,
@@ -62,14 +62,14 @@ enum InputAlphabet {
     DIVIDE,
     LEFT_PAREN,
     RIGHT_PAREN,
-    COLON, // Added for the ':' character
+    COLON, 
     WHITESPACE,
     EOL,
-    OTHER // Any character not recognized
+    OTHER // Any character that is not part of our alphabet
 }
 
 public class Main {
-    // The core of the scanner: a 2D array mapping (currentState, input) -> nextState
+    // State transition table in the form of a 2D array
     static State[][] transitions = new State[State.values().length][InputAlphabet.values().length];
     static Map<String, String> keywords = new HashMap<>();
 
@@ -101,18 +101,18 @@ public class Main {
         transitions[State.START.ordinal()][InputAlphabet.RIGHT_PAREN.ordinal()] = State.RIGHT_PAREN;
         transitions[State.START.ordinal()][InputAlphabet.COLON.ordinal()] = State.COLON;
 
-        // Transitions for building identifiers [cite: 83, 84]
+        // Transitions for building identifiers 
         transitions[State.IN_IDENTIFIER.ordinal()][InputAlphabet.LETTER.ordinal()] = State.IN_IDENTIFIER;
         transitions[State.IN_IDENTIFIER.ordinal()][InputAlphabet.DIGIT.ordinal()] = State.IN_IDENTIFIER;
         transitions[State.IN_IDENTIFIER.ordinal()][InputAlphabet.UNDERSCORE.ordinal()] = State.IN_IDENTIFIER;
 
-        // Transitions for building numbers (integers and floats) [cite: 10]
+        // Transitions for building numbers 
         transitions[State.IN_INTEGER.ordinal()][InputAlphabet.DIGIT.ordinal()] = State.IN_INTEGER;
         transitions[State.IN_INTEGER.ordinal()][InputAlphabet.POINT.ordinal()] = State.SAW_POINT;
         transitions[State.SAW_POINT.ordinal()][InputAlphabet.DIGIT.ordinal()] = State.IN_FLOAT;
         transitions[State.IN_FLOAT.ordinal()][InputAlphabet.DIGIT.ordinal()] = State.IN_FLOAT;
         
-        // Transitions for comparison operators [cite: 12, 13]
+        // Transitions for comparison operators 
         transitions[State.SAW_LESS.ordinal()][InputAlphabet.EQUALS.ordinal()] = State.LESS_EQUAL;
         transitions[State.SAW_GREATER.ordinal()][InputAlphabet.EQUALS.ordinal()] = State.GREATER_EQUAL;
         transitions[State.SAW_ASSIGN.ordinal()][InputAlphabet.EQUALS.ordinal()] = State.EQUAL;
@@ -120,14 +120,14 @@ public class Main {
     }
 
     /**
-     * Initializes a map of keywords for the dialect.
+     * Initializes a map of the keywords for the dialect (reserved identifiers)
      */
     static void initializeKeywords() {
-        keywords.put("if", "IF_KEYWORD"); // [cite: 8]
-        keywords.put("elif", "ELIF_KEYWORD"); // [cite: 8]
-        keywords.put("else", "ELSE_KEYWORD"); // [cite: 8]
-        keywords.put("for", "FOR_KEYWORD"); // [cite: 6]
-        keywords.put("while", "WHILE_KEYWORD"); // [cite: 7]
+        keywords.put("if", "IF_KEYWORD"); 
+        keywords.put("elif", "ELIF_KEYWORD"); 
+        keywords.put("else", "ELSE_KEYWORD"); 
+        keywords.put("for", "FOR_KEYWORD");
+        keywords.put("while", "WHILE_KEYWORD"); 
     }
 
     /**
@@ -160,8 +160,8 @@ public class Main {
     }
 
     /**
-     * Processes a finalized lexeme and prints the corresponding token. 
-     * It checks if an identifier is actually a reserved keyword.
+     * Processes a finalized set of lexemes and prints the corresponding token. 
+     * It also checks if an identifier is actually one of our reserved keywords
      * @param finalState The accepting state the FSM ended in.
      * @param lexeme The character sequence that forms the token.
      */
@@ -174,7 +174,7 @@ public class Main {
             tokenType = keywords.get(lexeme);
         }
         
-        System.out.printf("Token Class: %-20s Value: %s%n", tokenType, lexeme); // [cite: 28, 29]
+        System.out.printf("Token Class: %-20s Value: %s%n", tokenType, lexeme); 
     }
 
     public static void main(String[] args) {
@@ -189,10 +189,12 @@ public class Main {
         System.out.println("Scanning: " + sourceFile);
         System.out.println("------------------------------------");
 
-        initializeTransitionTable(); // [cite: 24]
+        initializeTransitionTable(); 
         initializeKeywords();
 
-        try (PushbackReader pr = new PushbackReader(new FileReader(sourceFile))) { // [cite: 25]
+        // We use PushbackReader because we can place characters like "." back in the stream while processing
+        // if needed
+        try (PushbackReader pr = new PushbackReader(new FileReader(sourceFile))) { 
             State currentState = State.START;
             StringBuilder currentLexeme = new StringBuilder();
             int charCode;
