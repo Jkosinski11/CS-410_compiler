@@ -1,107 +1,94 @@
 import transitionTable.*;
 
-public class Transitions {
-    public static State currentState;
-    public static Alphabet currentAlphabet;
-
-    public static State invalid() {
-        return new State(EnumState.Invalid);
+public interface Transitions {
+    static  State invalid(State ignoredState, Alphabet ignoredAlphabet) {
+        return new State(StateEnum.Invalid);
     }
 
-    public static State newIdentifier() {
-        return new State(EnumState.Identifier).setValue(String.valueOf(currentAlphabet.getChar()));
+    static State newIdentifier(State ignoredState, Alphabet currentAlphabet) {
+        return new State(StateEnum.Identifier).setValue(String.valueOf(currentAlphabet.getChar()));
     }
 
-    public static State extendIdentifier() {
-        String extended = new StringBuilder()
-                .append(currentState.getValue())
-                .append(currentAlphabet.getChar())
-                .toString();
+    static State extendIdentifier(State currentState, Alphabet currentAlphabet) {
+        String extended = currentState.getValue() +
+                currentAlphabet.getChar();
         return switch (extended) {
-            case "if" -> new State(EnumState.Keyword).setKeyword(Keyword.If);
-            case "else" -> new State(EnumState.Keyword).setKeyword(Keyword.Else);
-            case "for" -> new State(EnumState.Keyword).setKeyword(Keyword.For);
-            case "while" -> new State(EnumState.Keyword).setKeyword(Keyword.While);
-            case "elif" -> new State(EnumState.Keyword).setKeyword(Keyword.Elif);
-            default -> new State(EnumState.Identifier).setValue(extended);
+            case "if" -> new State(StateEnum.Keyword).setKeyword(Keyword.If);
+            case "else" -> new State(StateEnum.Keyword).setKeyword(Keyword.Else);
+            case "for" -> new State(StateEnum.Keyword).setKeyword(Keyword.For);
+            case "while" -> new State(StateEnum.Keyword).setKeyword(Keyword.While);
+            case "elif" -> new State(StateEnum.Keyword).setKeyword(Keyword.Elif);
+            default -> new State(StateEnum.Identifier).setValue(extended);
         };
     }
 
-    public static State keywordToIdentifier() {
-        String newValue = new StringBuilder()
-                .append(currentState.getKeyword().value)
-                .append(currentAlphabet.getChar())
-                .toString();
-        return new State(EnumState.Identifier).setValue(newValue);
+    static State keywordToIdentifier(State currentState, Alphabet currentAlphabet) {
+        String newValue = currentState.getKeyword().value +
+                currentAlphabet.getChar();
+        return new State(StateEnum.Identifier).setValue(newValue);
     }
 
-    public static State newInteger() {
-        return new State(EnumState.Integer).setValue(String.valueOf(currentAlphabet.getChar()));
+    static State newInteger(State ignoredState, Alphabet currentAlphabet) {
+        return new State(StateEnum.Integer).setValue(String.valueOf(currentAlphabet.getChar()));
     }
 
-    public static State extendInteger() {
-        String newValue = new StringBuilder()
-                .append(currentState.getValue())
-                .append(currentAlphabet.getChar())
-                .toString();
-        return new State(EnumState.Integer).setValue(newValue);
+    static State extendInteger(State currentState, Alphabet currentAlphabet) {
+        String newValue = currentState.getValue() +
+                currentAlphabet.getChar();
+        return new State(StateEnum.Integer).setValue(newValue);
     }
 
-    public static State integerToPoint() {
-        String newValue = new StringBuilder()
-                .append(currentState.getValue())
-                .append('.')
-                .toString();
-        return new State(EnumState.Point).setValue(newValue);
+    static State integerToPoint(State currentState, Alphabet ignoredAlphabet) {
+        String newValue = currentState.getValue() +
+                '.';
+        return new State(StateEnum.Point).setValue(newValue);
     }
 
-    public static State toFloat() {
-        String newValue = new StringBuilder()
-                .append(currentState.getValue())
-                .append(currentAlphabet.getChar())
-                .toString();
-        return new State(EnumState.Float).setValue(newValue);
+    static State toFloat(State currentState, Alphabet currentAlphabet) {
+        String newValue = currentState.getValue() +
+                currentAlphabet.getChar();
+        return new State(StateEnum.Float).setValue(newValue);
     }
 
-    public static State tab() {
-        return new State(EnumState.Tab);
+    static State tab(State ignoredState, Alphabet ignoredAlphabet) {
+        return new State(StateEnum.Tab);
     }
 
-    public static State whitespace() {
-        return new State(EnumState.Whitespace).setCount(1);
+    static State whitespace(State ignoredState, Alphabet ignoredAlphabet) {
+        return new State(StateEnum.Whitespace).setCount(1);
     }
 
-    public static State extendWhitespace() {
+    static State extendWhitespace(State currentState, Alphabet ignoredAlphabet) {
         int newCount = currentState.getCount() + 1;
         if (newCount == Main.SPACES_IN_TAB) {
-            return new State(EnumState.Tab);
+            return new State(StateEnum.Tab);
         }
-        return new State(EnumState.Whitespace).setCount(newCount);
+        return new State(StateEnum.Whitespace).setCount(newCount);
     }
 
-    public static State newline() {
-        return new State(EnumState.Newline);
+    static State newline(State ignoredState, Alphabet ignoredAlphabet) {
+        return new State(StateEnum.Newline);
     }
 
-    public static State parenthesis() {
-        return new State(EnumState.Parentheses).setParentheses(currentAlphabet.getParentheses());
+    static State parenthesis(State ignoredState, Alphabet currentAlphabet) {
+        return new State(StateEnum.Parentheses).setParentheses(currentAlphabet.getParentheses());
     }
 
-    public static State newOperator() {
-        return new State(EnumState.Operator).setOperator(currentAlphabet.getOperator());
+    static State newOperator(State ignoredState, Alphabet currentAlphabet) {
+        return new State(StateEnum.Operator).setOperator(currentAlphabet.getOperator());
     }
 
-    public static State extendOperator() {
-        if (currentAlphabet.getOperator() == Operator.Equals) {
+    static State extendOperator(State currentState, Alphabet currentAlphabet) {
+        if (currentAlphabet.getOperator() == Operator.Assign) {
             return switch (currentState.getOperator()) {
-                case Assign -> new State(EnumState.Operator).setOperator(Operator.Equals);
-                case Greater -> new State(EnumState.Operator).setOperator(Operator.GreaterEquals);
-                case Less -> new State(EnumState.Operator).setOperator(Operator.LessEquals);
-                case Bang -> new State(EnumState.Operator).setOperator(Operator.NotEquals);
-                default -> new State(EnumState.Invalid);
+                case Assign -> new State(StateEnum.Operator).setOperator(Operator.Equals);
+                case Greater -> new State(StateEnum.Operator).setOperator(Operator.GreaterEquals);
+                case Less -> new State(StateEnum.Operator).setOperator(Operator.LessEquals);
+                case Bang -> new State(StateEnum.Operator).setOperator(Operator.NotEquals);
+                default -> new State(StateEnum.Invalid);
             };
         } else {
-            return new State(EnumState.Invalid);
+            return new State(StateEnum.Invalid);
         }
     }
 }

@@ -1,6 +1,6 @@
 package transitionTable;
 
-public enum EnumAlphabet {
+public enum AlphaEnum {
     Letter,
     Digit,
     Operator,

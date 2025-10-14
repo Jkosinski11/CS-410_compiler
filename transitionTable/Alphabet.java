@@ -1,80 +1,75 @@
 package transitionTable;
 
 public class Alphabet {
-    private EnumAlphabet e;
+    private final AlphaEnum e;
     private char c;
     private Operator op;
     private Parentheses p;
 
     public Alphabet (char in) {
         if (Character.isLetter(in) || in == '_') {
-            e = EnumAlphabet.Letter;
+            e = AlphaEnum.Letter;
             c = in;
         } else if (Character.isDigit(in)) {
-            e = EnumAlphabet.Digit;
+            e = AlphaEnum.Digit;
             c = in;
         } else {
             switch (in) {
-                case '.' -> e = EnumAlphabet.Point;
-                case ' ' -> e = EnumAlphabet.Space;
-                case '\t' -> e = EnumAlphabet.Tab;
-                case '\r' -> e = EnumAlphabet.Return;
+                case '.' -> e = AlphaEnum.Point;
+                case ' ' -> e = AlphaEnum.Space;
+                case '\t' -> e = AlphaEnum.Tab;
+                case '\r' -> e = AlphaEnum.Return;
                 case '(' -> {
-                    e = EnumAlphabet.Parenthesis;
+                    e = AlphaEnum.Parenthesis;
                     p = Parentheses.LeftParenthesis;
                 }
                 case ')' -> {
-                    e = EnumAlphabet.Parenthesis;
+                    e = AlphaEnum.Parenthesis;
                     p = Parentheses.RightParenthesis;
                 }
                 case '+' -> {
-                    e = EnumAlphabet.Operator;
+                    e = AlphaEnum.Operator;
                     op = Operator.Plus;
                 }
                 case '-' -> {
-                    e = EnumAlphabet.Operator;
+                    e = AlphaEnum.Operator;
                     op = Operator.Minus;
                 }
                 case '*' -> {
-                    e = EnumAlphabet.Operator;
+                    e = AlphaEnum.Operator;
                     op = Operator.Multiply;
                 }
                 case '/' -> {
-                    e = EnumAlphabet.Operator;
+                    e = AlphaEnum.Operator;
                     op = Operator.Divide;
                 }
                 case '=' -> {
-                    e = EnumAlphabet.Operator;
+                    e = AlphaEnum.Operator;
                     op = Operator.Assign;
                 }
                 case '!' -> {
-                    e = EnumAlphabet.Operator;
+                    e = AlphaEnum.Operator;
                     op = Operator.Bang;
                 }
                 case '>' -> {
-                    e = EnumAlphabet.Operator;
+                    e = AlphaEnum.Operator;
                     op = Operator.Greater;
                 }
                 case '<' -> {
-                    e = EnumAlphabet.Operator;
+                    e = AlphaEnum.Operator;
                     op = Operator.Less;
                 }
                 case ':' -> {
-                    e = EnumAlphabet.Operator;
+                    e = AlphaEnum.Operator;
                     op = Operator.Colon;
                 }
-                default -> e = EnumAlphabet.Other;
+                default -> e = AlphaEnum.Other;
             }
         }
     }
 
-    public EnumAlphabet getEnum() {
+    public AlphaEnum getEnum() {
         return e;
-    }
-
-    public Alphabet setEnum(EnumAlphabet e) {
-        this.e = e;
-        return this;
     }
 
     public char getChar() {
@@ -85,23 +80,12 @@ public class Alphabet {
     }
 
     public Parentheses getParentheses() {
-        if (e == EnumAlphabet.Parenthesis) return p;
+        if (e == AlphaEnum.Parenthesis) return p;
         else throw new IllegalStateException();
-    }
-
-    public Alphabet setParentheses(Parentheses p) {
-        if  (e == EnumAlphabet.Parenthesis) this.p = p;
-        else throw new IllegalStateException();
-        return this;
     }
 
     public Operator getOperator() {
-        if (e == EnumAlphabet.Operator) return op;
+        if (e == AlphaEnum.Operator) return op;
         else throw new IllegalStateException();
-    }
-    public Alphabet setOperator(Operator op) {
-        if (e == EnumAlphabet.Operator) this.op = op;
-        else throw new IllegalStateException();
-        return this;
     }
 }

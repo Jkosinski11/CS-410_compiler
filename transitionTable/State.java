@@ -1,44 +1,39 @@
 package transitionTable;
 
 public class State {
-    private EnumState e;
+    private final StateEnum e;
     private Keyword kw;
     private Parentheses p;
     private Operator op;
     private String value;
     private int count;
 
-    public State(EnumState e) {
+    public State(StateEnum e) {
         this.e = e;
     }
 
-    public EnumState getEnum() {
+    public StateEnum getEnum() {
         return e;
     }
 
-    public State setEnum(EnumState e) {
-        this.e = e;
-        return this;
-    }
-
     public int getCount() {
-        if (e == EnumState.Whitespace) return count;
+        if (e == StateEnum.Whitespace) return count;
         else throw new IllegalStateException();
     }
 
     public State setCount(int count) {
-        if (e == EnumState.Whitespace) this.count = count;
+        if (e == StateEnum.Whitespace) this.count = count;
         else throw new IllegalStateException();
         return this;
     }
 
     public Keyword getKeyword() {
-        if (e == EnumState.Keyword) return kw;
+        if (e == StateEnum.Keyword) return kw;
         else throw new IllegalStateException();
     }
 
     public State setKeyword(Keyword kw) {
-        if (e == EnumState.Keyword) this.kw = kw;
+        if (e == StateEnum.Keyword) this.kw = kw;
         else throw new IllegalStateException();
         return this;
     }
@@ -59,23 +54,40 @@ public class State {
     }
 
     public Parentheses getParentheses() {
-        if (e == EnumState.Parentheses) return p;
+        if (e == StateEnum.Parentheses) return p;
         else throw new IllegalStateException();
     }
 
     public State setParentheses(Parentheses p) {
-        if (e == EnumState.Parentheses) this.p = p;
+        if (e == StateEnum.Parentheses) this.p = p;
         else throw new IllegalStateException();
         return this;
     }
 
     public Operator getOperator() {
-        if (e == EnumState.Operator) return op;
+        if (e == StateEnum.Operator) return op;
         else throw new IllegalStateException();
     }
     public State setOperator(Operator op) {
-        if (e == EnumState.Operator) this.op = op;
+        if (e == StateEnum.Operator) this.op = op;
         else throw new IllegalStateException();
         return this;
+    }
+
+    public void print() {
+        switch (e) {
+            case Start -> System.out.println("START");
+            case Newline -> System.out.println("NEWLINE");
+            case Whitespace -> System.out.println("WHITESPACE");
+            case Tab -> System.out.println("TAB");
+            case Invalid -> System.out.println("INVALID");
+            case Parentheses -> System.out.println("PARENTHESIS,\t"+ p.name());
+            case Keyword -> System.out.println("KEYWORD,\t"+ kw.value);
+            case Operator -> System.out.println("OPERATOR,\t"+ op.name());
+            case Identifier -> System.out.println("IDENTIFIER,\t"+ value);
+            case Integer -> System.out.println("INTEGER,\t"+ value);
+            case Float -> System.out.println("FLOAT,\t"+ value);
+            default -> {}
+        }
     }
 }

@@ -1,6 +1,6 @@
 package transitionTable;
 
-public enum EnumState {
+public enum StateEnum {
     Float,
     Identifier,
     Integer,
