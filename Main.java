@@ -1,15 +1,14 @@
-import transitionTable.AlphaEnum;
-import transitionTable.Alphabet;
-import transitionTable.State;
-import transitionTable.StateEnum;
+import transitionTable.*;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
+import java.util.ArrayList;
 import java.util.function.BiFunction;
 
 public class Main {
     static final int SPACES_IN_TAB = 4;
+
+    static ArrayList<State> outputStates = new ArrayList<>();
+
     static BiFunction<State, Alphabet, State>[][] table =
             new BiFunction[StateEnum.values().length][AlphaEnum.values().length];
 
@@ -99,47 +98,61 @@ public class Main {
 
         File f = new File(args[0]);
 
+
+
         try (FileReader fr = new FileReader(f.getAbsolutePath())) {
-            int n = fr.read();
-            while (n != -1) {
-                Alphabet currentAlphabet = new Alphabet((char) n);
-                State nextState = table[currentState.getEnum().ordinal()][currentAlphabet.getEnum().ordinal()]
-                        .apply(currentState, currentAlphabet);
+            try (BufferedWriter bw = new BufferedWriter(new FileWriter("output.csv"))) {
+                int n = fr.read();
+                while (n != -1) {
+                    Alphabet currentAlphabet = new Alphabet((char) n);
+                    State nextState = table[currentState.getEnum().ordinal()][currentAlphabet.getEnum().ordinal()]
+                            .apply(currentState, currentAlphabet);
 
-                //print current state when different from next (with exceptions)
-                if (currentState.getEnum() != nextState.getEnum()) {
-                    switch (currentState.getEnum()) {
-                        case Identifier -> {
-                            if (nextState.getEnum() != StateEnum.Keyword) {
-                                currentState.print();
+                    //print current state when different from next (with exceptions)
+                    if (currentState.getEnum() != nextState.getEnum() || currentState.getEnum() == StateEnum.Parentheses) {
+                        switch (currentState.getEnum()) {
+                            case Identifier -> {
+                                if (nextState.getEnum() != StateEnum.Keyword) {
+                                    currentState.print(bw);
+                                    outputStates.add(currentState);
+                                }
+                            }
+                            case Whitespace -> {
+                                if (nextState.getEnum() != StateEnum.Tab) {
+                                    currentState.print(bw);
+                                    outputStates.add(currentState);
+                                }
+                            }
+                            case Integer -> {
+                                if (nextState.getEnum() != StateEnum.Point) {
+                                    currentState.print(bw);
+                                    outputStates.add(currentState);
+                                }
+                            }
+                            case Point -> {
+                            }
+                            default -> {
+                                currentState.print(bw);
+                                outputStates.add(currentState);
                             }
                         }
-                        case Whitespace -> {
-                            if (nextState.getEnum() != StateEnum.Tab) {
-                                currentState.print();
-                            }
+                        if (nextState.getEnum() == StateEnum.Newline) {
+                            int ignored = fr.read();
                         }
-                        case Integer -> {
-                            if (nextState.getEnum() != StateEnum.Point) {
-                                currentState.print();
-                            }
-                        }
-                        case Point -> {
-                        }
-                        default -> currentState.print();
                     }
-                    if (nextState.getEnum() == StateEnum.Newline) {
-                        int ignored = fr.read();
+
+                    currentState = nextState;
+
+                    n = fr.read();
+                    if (n == -1) {
+                        currentState.print(bw);
+                        outputStates.add(currentState);
                     }
-                }
-
-                currentState = nextState;
-
-                n = fr.read();
-                if (n == -1) {
-                    currentState.print();
                 }
             }
+            Parser parser = new Parser(outputStates.iterator());
+            parser.program();
+
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

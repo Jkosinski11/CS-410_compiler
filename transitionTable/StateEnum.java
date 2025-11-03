@@ -13,4 +13,5 @@ public enum StateEnum {
     Start,
     Tab,
     Whitespace,
+    EOF
 }

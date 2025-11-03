@@ -1,5 +1,8 @@
 package transitionTable;
 
+import java.io.BufferedWriter;
+import java.io.IOException;
+
 public class State {
     private final StateEnum e;
     private Keyword kw;
@@ -74,20 +77,21 @@ public class State {
         return this;
     }
 
-    public void print() {
+    public void print(BufferedWriter bw) throws IOException {
         switch (e) {
-            case Start -> System.out.println("START");
-            case Newline -> System.out.println("NEWLINE");
-            case Whitespace -> System.out.println("WHITESPACE");
-            case Tab -> System.out.println("TAB");
-            case Invalid -> System.out.println("INVALID");
-            case Parentheses -> System.out.println("PARENTHESIS,\t"+ p.name());
-            case Keyword -> System.out.println("KEYWORD,\t"+ kw.value);
-            case Operator -> System.out.println("OPERATOR,\t"+ op.name());
-            case Identifier -> System.out.println("IDENTIFIER,\t"+ value);
-            case Integer -> System.out.println("INTEGER,\t"+ value);
-            case Float -> System.out.println("FLOAT,\t"+ value);
+            case Start ->       bw.write("START");
+            case Newline ->     bw.write("NEWLINE");
+            case Whitespace ->  bw.write("WHITESPACE");
+            case Tab ->         bw.write("TAB");
+            case Invalid ->     bw.write("INVALID");
+            case Parentheses -> bw.write("PARENTHESIS, "+ p.name());
+            case Keyword ->     bw.write("KEYWORD, "+ kw.value);
+            case Operator ->    bw.write("OPERATOR, "+ op.name());
+            case Identifier ->  bw.write("IDENTIFIER, "+ value);
+            case Integer ->     bw.write("INTEGER, "+ value);
+            case Float ->       bw.write("FLOAT, "+ value);
             default -> {}
         }
+        bw.newLine();
     }
 }

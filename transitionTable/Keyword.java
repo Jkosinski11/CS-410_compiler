@@ -5,6 +5,7 @@ public enum Keyword {
     Else("else"),
     For("for"),
     If("if"),
+    In("in"),
     While("while");
 
     public final String value;

@@ -18,6 +18,7 @@ public interface Transitions {
             case "for" -> new State(StateEnum.Keyword).setKeyword(Keyword.For);
             case "while" -> new State(StateEnum.Keyword).setKeyword(Keyword.While);
             case "elif" -> new State(StateEnum.Keyword).setKeyword(Keyword.Elif);
+            case "in" ->  new State(StateEnum.Keyword).setKeyword(Keyword.In);
             default -> new State(StateEnum.Identifier).setValue(extended);
         };
     }
