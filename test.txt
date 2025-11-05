@@ -1,0 +1,26 @@
+Token Class: IDENTIFIER           Value: x
+Token Class: SPACE                Value: N/A
+Token Class: OPERATOR             Value: =
+Token Class: SPACE                Value: N/A
+Token Class: INTEGER_LITERAL      Value: 3
+Token Class: SPACE                Value: N/A
+Token Class: OPERATOR             Value: +
+Token Class: SPACE                Value: N/A
+Token Class: INTEGER_LITERAL      Value: 4
+Token Class: SPACE                Value: N/A
+Token Class: OPERATOR             Value: *
+Token Class: SPACE                Value: N/A
+Token Class: INTEGER_LITERAL      Value: 2
+Token Class: NEWLINE              Value: N/A
+
+Token Class: IDENTIFIER           Value: y
+Token Class: SPACE                Value: N/A
+Token Class: OPERATOR             Value: =
+Token Class: SPACE                Value: N/A
+Token Class: OPERATOR             Value: -
+Token Class: IDENTIFIER           Value: x
+Token Class: SPACE                Value: N/A
+Token Class: OPERATOR             Value: +
+Token Class: SPACE                Value: N/A
+Token Class: INTEGER_LITERAL      Value: 10
+Token Class: NEWLINE              Value: N/A
