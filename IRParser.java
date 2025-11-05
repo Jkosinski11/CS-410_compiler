@@ -26,7 +26,7 @@ import java.nio.file.Paths;
  * javac IRParser.java
  *
   token file:
- * java ParseAtomsFromTokenFolder test.txt
+ * java IRParser test.txt
  *
  *
  * SUPPORTED "Token Class:" NAMES
@@ -75,11 +75,11 @@ public class IRParser {
                 case SUB: return "(SUB, " + left + ", " + right + ", " + result + ")";
                 case MUL: return "(MUL, " + left + ", " + right + ", " + result + ")";
                 case DIV: return "(DIV, " + left + ", " + right + ", " + result + ")";
-                case NEG: return "(NEG, " + left + ", , " + result + ")";
-                case MOV: return "(MOV, " + left + ", , " + result + ")";
-                case JMP: return "(JMP, , , , , " + dest + ")";
-                case LBL: return "(LBL, , , , , " + dest + ")";
-                case TST: return "(TST, " + left + ", " + right + ", , " + cmp.ordinal() + ", " + dest + ")";
+                case NEG: return "(NEG, " + left + ",_, " + result + ")";
+                case MOV: return "(MOV, " + left + ",_, " + result + ")";
+                case JMP: return "(JMP,_,_,_,_, " + dest + ")";
+                case LBL: return "(LBL,_,_ ,_,_, " + dest + ")";
+                case TST: return "(TST, " + left + ", " + right + ",_, " + cmp.ordinal() + ", " + dest + ")";
                 default: throw new AssertionError(op);
             }
         }
@@ -91,7 +91,7 @@ public class IRParser {
 
     enum TokType {
         IDENT, INT, FLOAT,
-        OP,          // + - * / == != < > <= >= =
+        OP,         
         LPAREN, RPAREN,
         KW_IF, KW_ELIF, KW_ELSE, KW_WHILE, KW_FOR,
         EOF
@@ -99,14 +99,11 @@ public class IRParser {
 
     static final class Tok {
         final TokType type;
-        final String lexeme; // for IDENT/NUMBER/OP
+        final String lexeme; 
         Tok(TokType t, String lx) { this.type = t; this.lexeme = lx; }
         public String toString(){ return type + (lexeme!=null?(":"+lexeme):""); }
     }
 
-    /* ============================
-     * ADAPTER: READ TOKEN DUMP TXT
-     * ============================ */
 
     static final class TokenDumpAdapter {
 
@@ -122,10 +119,7 @@ public class IRParser {
 
                     // Expect formats like:
                     // Token Class: IDENTIFIER           Value: x
-                    // Token Class: OPERATOR             Value: <=
-                    // Token Class: (                    Value: N/A
-                    // Token Class: NEWLINE              Value: N/A
-                    // … etc.
+                 
 
                     if (!line.startsWith("Token Class:")) continue; // skip headers like "anning: test.txt" etc.
 
@@ -153,7 +147,6 @@ public class IRParser {
                         case "SPACE":
                         case "NEWLINE":
                         case "COLON":
-                            // Ignore trivia for this parser
                             break;
 
                         case "(":
@@ -214,10 +207,6 @@ public class IRParser {
         }
     }
 
-    /* ======================
-     * (II)(III)(IV) PARSER
-     * ====================== */
-
     static final class Parser {
         private final List<Atom> out = new ArrayList<>();
         private final List<Tok> tokens;
@@ -228,7 +217,6 @@ public class IRParser {
 
         List<Atom> getAtoms(){ return out; }
 
-        /* --- small helpers --- */
         private Tok la(){ return tokens.get(pos); }
         private TokType lat(){ return la().type; }
         private boolean match(TokType t){ if (lat()==t){ pos++; return true;} return false; }
@@ -318,24 +306,22 @@ public class IRParser {
             expect(TokType.KW_FOR,"'for'");
             expect(TokType.LPAREN,"'('");
 
-            // init (optional)
+
             if (lat()!=TokType.RPAREN && !(lat()==TokType.OP && ";".equals(la().lexeme))) {
                 if (peekAssign()) assign(); else expr();
             }
-            // optional ';'
             if (lat()==TokType.OP && ";".equals(la().lexeme)) pos++;
 
             String start = newLabel(), end = newLabel(), stepLbl = newLabel();
             out.add(Atom.lbl(start));
 
-            // cond (optional)
+         
             boolean hasCond = (lat()!=TokType.RPAREN && !(lat()==TokType.OP && ";".equals(la().lexeme)));
             if (hasCond) condToTSTJump(end); else out.add(Atom.tst("0","0",Cmp.ALW, stepLbl));
 
-            // ';'
+   
             if (lat()==TokType.OP && ";".equals(la().lexeme)) pos++;
 
-            // step (optional)
             if (lat()!=TokType.RPAREN) expr();
 
             expect(TokType.RPAREN,"')'");
@@ -425,10 +411,6 @@ public class IRParser {
         }
     }
 
-    /* ==========
-     * MAIN
-     * ========== */
-
     public static void main(String[] args) throws Exception {
         if (args.length != 1) {
             System.err.println("Usage: java ParseAtomsFromTokenFolder <token-file-or-folder>");
@@ -441,7 +423,7 @@ public class IRParser {
         }
 
         if (Files.isDirectory(p)) {
-            // Process all .txt / .tokens in alphabetical order
+            
             try (DirectoryStream<Path> ds = Files.newDirectoryStream(p, path -> {
                 String name = path.getFileName().toString().toLowerCase(Locale.ROOT);
                 return Files.isRegularFile(path) && (name.endsWith(".txt") || name.endsWith(".tokens"));
