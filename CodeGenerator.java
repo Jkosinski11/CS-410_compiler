@@ -28,7 +28,7 @@ public class CodeGenerator {
         final Cmp cmp;
         final String dest;
 
-        // You can keep the constructor simple
+        
         public Atom(Opcode op, String left, String right, String result, Cmp cmp, String dest) {
             this.op = op; 
             this.left = left; 
@@ -38,8 +38,7 @@ public class CodeGenerator {
             this.dest = dest;
         }
         
-        // You don't necessarily need the factory methods (Atom.add, Atom.sub) 
-        // because you are now READING atoms, not creating them from scratch.
+       
         
         @Override public String toString() {
             // You can keep this for debugging
@@ -51,6 +50,10 @@ public class CodeGenerator {
     // Start addresses at 1000 to leave plenty of space for instructions to be stored
     static Map<String, Integer> memoryMap = new HashMap<>();
     static int nextAddress = 1000;
+    
+    static Map<String, Integer> labelTable = new HashMap<>();
+    
+    static int instructionCounter = 0;
 
     // Opcodes for Phase 3 (based on instructions)
     static final int OP_CLR = 0;
@@ -83,6 +86,8 @@ public class CodeGenerator {
 
         //Assigns memory addresses to the literals and vars 
         //(first pass in other code will handle label table for JMP labels)
+        firstPass(atoms); 
+        
         for(Atom a: atoms) {
             mapData(a.left);
             mapData(a.right);
@@ -106,7 +111,19 @@ public class CodeGenerator {
 
     // Retrieves the address. If it's a Label (not in map), returns 0 for Part A
     private static int getAddr(String s) {
+    	Integer dataAddr = memoryMap.get(s);
+        if (dataAddr != null) {
+            return dataAddr;
+        }
+
+        // Then check labels
+        Integer labelAddr = labelTable.get(s);
+        if (labelAddr != null) {
+            return labelAddr;
+        }
+
         return memoryMap.getOrDefault(s, 0); 
+        
     }
 
     // Bitwise construction of the 32-bit instruction
@@ -126,6 +143,59 @@ public class CodeGenerator {
         // Print as 32-bit Binary String (padded with leading zeros to reach 32 bits)
         String binary = String.format("%32s", Long.toBinaryString(instruction)).replace(' ', '0');
         System.out.println(binary);
+    }
+    
+    private static void firstPass(List<Atom> atoms) {
+        // 1) Assign memory addresses to variables and literals
+        for (Atom a : atoms) {
+            mapData(a.left);
+            mapData(a.right);
+            mapData(a.result);
+            // Do NOT map a.dest, because it's used as a label, not data
+        }
+
+        // 2) Walk atoms, simulate instruction emission to compute label addresses
+        instructionCounter = 0;
+
+        for (Atom a : atoms) {
+            switch (a.op) {
+                case LBL:
+                    // Label marks the address of the next instruction
+                    if (a.dest != null && !"_".equals(a.dest)) {
+                        labelTable.put(a.dest, instructionCounter);
+                    }
+                    // LBL itself generates no code
+                    break;
+
+                case ADD:
+                case SUB:
+                case MUL:
+                case DIV:
+                    // LOD, OP, STO
+                    instructionCounter += 3;
+                    break;
+
+                case NEG:
+                    // CLR, SUB, STO
+                    instructionCounter += 3;
+                    break;
+
+                case MOV:
+                    // LOD, STO
+                    instructionCounter += 2;
+                    break;
+
+                case JMP:
+                    // CMP(always), JMP
+                    instructionCounter += 2;
+                    break;
+
+                case TST:
+                    // LOD, CMP, JMP
+                    instructionCounter += 3;
+                    break;
+            }
+        }
     }
 
     // Main Translation Logic
