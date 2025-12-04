@@ -96,7 +96,7 @@ public class CodeGenerator {
             // we will handle these when we build the label table
         }
 
-        // generates the instructions for all of the atoms
+        // generates the instructions for all the atoms
         for (Atom a : atoms) {
             generateInstructions(a);
         }
@@ -146,6 +146,7 @@ public class CodeGenerator {
     }
     
     private static void firstPass(List<Atom> atoms) {
+        int r0 = 0; // Using Register 0 as default
         // 1) Assign memory addresses to variables and literals
         for (Atom a : atoms) {
             mapData(a.left);
@@ -187,12 +188,20 @@ public class CodeGenerator {
 
                 case JMP:
                     // CMP(always), JMP
-                    instructionCounter += 2;
+                    emit(OP_CMP, 0, r0, 0); // Compare r0 to 0 with Mode 0 (Always True)
+
+                    int target = labelTable.getOrDefault(a.dest, 0);
+                    emit(OP_JMP, 0, 0, target);
                     break;
 
                 case TST:
                     // LOD, CMP, JMP
-                    instructionCounter += 3;
+                    emit(OP_LOD, 0, r0, getAddr(a.left));
+                    int cmpCode = a.cmp.ordinal();
+                    emit(OP_CMP, cmpCode, r0, getAddr(a.right));
+
+                    int jumpTarget = labelTable.getOrDefault(a.dest, 0);
+                    emit(OP_JMP, 0, 0, jumpTarget);
                     break;
             }
         }
