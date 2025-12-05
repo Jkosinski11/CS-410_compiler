@@ -6,6 +6,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/*
+* To run the generator do "javac CodeGenerator.java" in the terminal.
+* Then do "java CodeGenerator atoms.txt" from the terminal to run the generator with the set of atoms
+* that have been taken from Phase 2 of the project's output. The output appears as 32 bit instructions in the
+* terminal output stream. 
+*/
+
 public class CodeGenerator {
 
     // ==========================================
