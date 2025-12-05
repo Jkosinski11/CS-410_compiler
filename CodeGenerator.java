@@ -13,8 +13,6 @@ public class CodeGenerator {
     // ==========================================
 
     enum Opcode { ADD, SUB, MUL, DIV, JMP, NEG, LBL, TST, MOV } 
-    // Note: I added LOD, STO, HLT, CLR, CMP purely for internal machine code generation mapping, 
-    // though your input file might only contain the original set.
 
     // cmp ∈ {0..6}: 0=always, 1==, 2<, 3>, 4<=, 5>=, 6!=
     enum Cmp { ALW, EQ, LT, GT, LE, GE, NE }
@@ -38,9 +36,8 @@ public class CodeGenerator {
         }
         
        
-        
+        // was used for debugging
         @Override public String toString() {
-            // You can keep this for debugging
             return String.format("(%s, %s, %s, %s)", op, left, right, result);
         }
     }
