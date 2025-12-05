@@ -1,5 +1,4 @@
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -146,68 +145,48 @@ public class CodeGenerator {
     }
     
     private static void firstPass(List<Atom> atoms) {
-        int r0 = 0; // Using Register 0 as default
-        // 1) Assign memory addresses to variables and literals
+        //Assign memory addresses to variables and literals
         for (Atom a : atoms) {
             mapData(a.left);
             mapData(a.right);
             mapData(a.result);
-            // Do NOT map a.dest, because it's used as a label, not data
         }
 
-        // 2) Walk atoms, simulate instruction emission to compute label addresses
+        //Walk atoms, calculate addresses
         instructionCounter = 0;
 
         for (Atom a : atoms) {
             switch (a.op) {
                 case LBL:
-                    // Label marks the address of the next instruction
                     if (a.dest != null && !"_".equals(a.dest)) {
                         labelTable.put(a.dest, instructionCounter);
                     }
-                    // LBL itself generates no code
                     break;
 
                 case ADD:
                 case SUB:
                 case MUL:
                 case DIV:
-                    // LOD, OP, STO
+                case NEG: // CLR, SUB, STO = 3 instructions
                     instructionCounter += 3;
                     break;
 
-                case NEG:
-                    // CLR, SUB, STO
-                    instructionCounter += 3;
-                    break;
-
-                case MOV:
-                    // LOD, STO
+                case MOV: // LOD, STO = 2 instructions
                     instructionCounter += 2;
                     break;
 
                 case JMP:
-                    // CMP(always), JMP
-                    emit(OP_CMP, 0, r0, 0); // Compare r0 to 0 with Mode 0 (Always True)
-
-                    int target = labelTable.getOrDefault(a.dest, 0);
-                    emit(OP_JMP, 0, 0, target);
+                    instructionCounter += 2; 
                     break;
 
                 case TST:
-                    // LOD, CMP, JMP
-                    emit(OP_LOD, 0, r0, getAddr(a.left));
-                    int cmpCode = a.cmp.ordinal();
-                    emit(OP_CMP, cmpCode, r0, getAddr(a.right));
-
-                    int jumpTarget = labelTable.getOrDefault(a.dest, 0);
-                    emit(OP_JMP, 0, 0, jumpTarget);
+                    instructionCounter += 3; 
                     break;
             }
         }
     }
-
-    // Main Translation Logic
+    // Main translation. Basically the 2nd pass because we save the generation and emitting of our
+    // binary for here for after the label table is made
     private static void generateInstructions(Atom a) {
         // We use Register 0 (r0) as our default accumulator for all operations.
         int r0 = 0; 
@@ -242,8 +221,8 @@ public class CodeGenerator {
                 break;
 
             case LBL:
-                // Labels generate NO code. They are just markers.
-                // In Part B, you will record the instruction pointer here.
+                // Labels generate NO code. They are just markers
+                // In Part B we record the instruction pointer here
                 break;
 
             case MOV:
